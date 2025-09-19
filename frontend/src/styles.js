@@ -121,6 +121,73 @@ const styles = {
         borderRadius: '4px',
         cursor: 'pointer',
     },
+
+    // Editor Page
+    editorLayout: {
+        display: 'flex',
+        // This height calculation is crucial for Monaco Editor to work.
+        // It subtracts the approximate height of the navbar and margins from the viewport height.
+        height: 'calc(100vh - 120px)',
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
+        overflow: 'hidden', // Prevents content from spilling out
+    },
+    fileList: {
+        width: '200px',
+        borderRight: '1px solid #ddd',
+        padding: '10px',
+        backgroundColor: '#fdfdfd',
+        overflowY: 'auto',
+    },
+    fileItem: {
+        padding: '10px',
+        cursor: 'pointer',
+        borderRadius: '4px',
+    },
+    activeFile: {
+        padding: '10px',
+        cursor: 'pointer',
+        borderRadius: '4px',
+        backgroundColor: '#e0e0e0',
+        fontWeight: 'bold',
+    },
+    editorContainer: {
+        flex: 1, // This makes the editor take up the remaining space.
+        height: '100%', // This forces the editor container to fill its parent's height.
+    },
+    addFileButton: { // New style for the "Add File" button
+        width: '100%',
+        padding: '8px',
+        marginBottom: '10px',
+        backgroundColor: '#2ecc71',
+        color: 'white',
+        border: 'none',
+        borderRadius: '4px',
+        cursor: 'pointer',
+        fontWeight: 'bold',
+        fontSize: '14px',
+    },
+    // New styles for the add file input form
+    addFileForm: {
+        display: 'flex',
+        marginBottom: '10px',
+    },
+    addFileInput: {
+        flex: 1,
+        padding: '8px',
+        border: '1px solid #ccc',
+        borderRadius: '4px 0 0 4px',
+        boxSizing: 'border-box'
+    },
+    addFileSubmit: {
+        padding: '8px 10px',
+        border: '1px solid #27ae60',
+        backgroundColor: '#27ae60',
+        color: 'white',
+        borderRadius: '0 4px 4px 0',
+        cursor: 'pointer',
+    },
 };
 
 export default styles;

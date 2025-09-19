@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom'; // Import Link
 import api from '../services/api.js';
 import styles from '../../styles.js';
 
@@ -83,7 +84,10 @@ function Dashboard({ token }) {
                     {projects.map(project => (
                         <div key={project.id} style={styles.projectItem}>
                             <div>
-                                <h3 style={styles.projectName}>{project.name}</h3>
+                                {/* Project name is now a clickable Link */}
+                                <Link to={`/project/${project.id}`} style={styles.projectLink}>
+                                    {project.name}
+                                </Link>
                                 <p style={styles.projectDate}>Created on: {formatDate(project.createdAt)}</p>
                             </div>
                             <button onClick={() => onDeleteProject(project.id)} style={styles.deleteButton}>Delete</button>

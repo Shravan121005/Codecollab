@@ -1,63 +1,96 @@
 const express = require('express');
 const router = express.Router();
-const { check, validationResult } = require('express-validator');
+const { Project, File } = require('../models'); // Now importing File model as well
 const authMiddleware = require('../middleware/authMiddleware');
-const { Project } = require('../models'); // Import Project model
+
+// Helper function to determine language from filename
+const getLanguageFromFilename = (filename) => {
+    const extension = filename.split('.').pop().toLowerCase();
+    const langMap = {
+        js: 'javascript',
+        jsx: 'javascript',
+        ts: 'typescript',
+        tsx: 'typescript',
+        py: 'python',
+        java: 'java',
+        c: 'c',
+        cpp: 'cpp',
+        cs: 'csharp',
+        html: 'html',
+        css: 'css',
+        json: 'json',
+        md: 'markdown',
+    };
+    return langMap[extension] || 'plaintext';
+};
 
 // @route   POST api/projects
 // @desc    Create a new project
 // @access  Private
-router.post(
-  '/',
-  [
-    authMiddleware,
-    [check('name', 'Project name is required').not().isEmpty()],
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+router.post('/', authMiddleware, async (req, res) => {
+    const { name } = req.body;
+    const ownerId = req.user.id;
 
     try {
-      // Define the default file structure here, in our application logic.
-      const defaultFiles = [
-        {
-          filename: 'index.js',
-          content: 'console.log("Hello, World!");',
-          language: 'javascript'
-        }
-      ];
+        // Create the project
+        const newProject = await Project.create({
+            name,
+            ownerId,
+        });
 
-      // Sequelize will use the 'ownerId' from the association we defined
-      const project = await Project.create({
-        name: req.body.name,
-        ownerId: req.user.id, // req.user.id comes from the authMiddleware
-        files: defaultFiles // Manually set the files on creation
-      });
+        // Create a default file associated with this new project
+        await File.create({
+            filename: 'index.js',
+            content: `// Welcome to your new project!\nconsole.log('Hello, ${name}!');`,
+            language: 'javascript',
+            projectId: newProject.id, // Link the file to the project
+        });
 
-      res.json(project);
+        res.status(201).json(newProject);
     } catch (err) {
-      console.error(err.message);
-      res.status(500).send('Server Error');
+        console.error(err.message);
+        res.status(500).send('Server Error');
     }
-  }
-);
+});
 
 // @route   GET api/projects
-// @desc    Get all projects for the logged-in user
+// @desc    Get all projects for a user
 // @access  Private
 router.get('/', authMiddleware, async (req, res) => {
-  try {
-    const projects = await Project.findAll({
-      where: { ownerId: req.user.id },
-      order: [['createdAt', 'DESC']], // Order by creation date descending
-    });
-    res.json(projects);
-  } catch (err) {
-    console.error(err.message);
-    res.status(500).send('Server Error');
-  }
+    try {
+        const projects = await Project.findAll({
+            where: { ownerId: req.user.id },
+            order: [['createdAt', 'DESC']],
+        });
+        res.json(projects);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route   GET api/projects/:id
+// @desc    Get a single project by ID with its files
+// @access  Private
+router.get('/:id', authMiddleware, async (req, res) => {
+    try {
+        const project = await Project.findOne({
+            where: { id: req.params.id, ownerId: req.user.id },
+            include: {
+                model: File,
+                as: 'files', // Use the alias defined in the association
+            },
+        });
+
+        if (!project) {
+            return res.status(404).json({ msg: 'Project not found' });
+        }
+
+        res.json(project);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
 });
 
 // @route   DELETE api/projects/:id
@@ -65,34 +98,47 @@ router.get('/', authMiddleware, async (req, res) => {
 // @access  Private
 router.delete('/:id', authMiddleware, async (req, res) => {
     try {
-        // Find the project by its primary key (id) and the owner's id
         const project = await Project.findOne({
-            where: {
-                id: req.params.id,
-                ownerId: req.user.id
-            }
+            where: { id: req.params.id, ownerId: req.user.id },
         });
 
-        // If project doesn't exist or doesn't belong to the user
         if (!project) {
-            return res.status(404).json({ msg: 'Project not found or user not authorized' });
+            return res.status(404).json({ msg: 'Project not found' });
         }
 
-        // Delete the project
         await project.destroy();
-
         res.json({ msg: 'Project removed' });
-
     } catch (err) {
         console.error(err.message);
-        // Check for specific error types if needed, e.g., invalid UUID format
-        if (err.name === 'SequelizeDatabaseError') {
-             return res.status(400).json({ msg: 'Invalid project ID format' });
-        }
         res.status(500).send('Server Error');
     }
 });
 
+// @route   POST api/projects/:projectId/files
+// @desc    Add a new file to a project
+// @access  Private
+router.post('/:projectId/files', authMiddleware, async (req, res) => {
+    const { filename } = req.body;
+    const { projectId } = req.params;
+    try {
+        const project = await Project.findOne({
+            where: { id: projectId, ownerId: req.user.id },
+        });
+        if (!project) {
+            return res.status(404).json({ msg: 'Project not found' });
+        }
+        const newFile = await File.create({
+            filename,
+            projectId: parseInt(projectId),
+            content: `// New file: ${filename}`,
+            language: getLanguageFromFilename(filename), // Use the helper function
+        });
+        res.status(201).json(newFile);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
 
 module.exports = router;
 
