@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import Editor from '@monaco-editor/react';
 import { io } from 'socket.io-client';
-import api from '../services/api';
-import styles from '../../styles';
+import api from '../services/api.js';
+import styles from '../../styles.js';
 
 const Project = ({ token }) => {
     const { id } = useParams();
@@ -13,6 +13,11 @@ const Project = ({ token }) => {
     const [error, setError] = useState('');
     const socketRef = useRef(null);
     const debounceTimeout = useRef(null);
+
+    // State for forms
+    const [newMemberEmail, setNewMemberEmail] = useState('');
+    const [showAddFileInput, setShowAddFileInput] = useState(false);
+    const [newFilename, setNewFilename] = useState('');
 
     // Fetch project details
     useEffect(() => {
@@ -29,7 +34,7 @@ const Project = ({ token }) => {
                         setCode(firstFile.content);
                     }
                 } else {
-                    throw new Error('Project not found');
+                    throw new Error('Project not found or access denied');
                 }
             } catch (err) {
                 setError('Failed to fetch project details.');
@@ -38,17 +43,17 @@ const Project = ({ token }) => {
         fetchProject();
     }, [id, token]);
 
-    // Handle Socket.IO connection
+    // Handle Socket.IO connection and events
     useEffect(() => {
         if (!project) return;
         socketRef.current = io('http://localhost:5000');
         const socket = socketRef.current;
         socket.emit('joinProject', { projectId: id });
+
         socket.on('codeUpdate', (data) => {
             if (selectedFile && data.fileId === selectedFile.id) {
                 setCode(prevCode => prevCode !== data.content ? data.content : prevCode);
             }
-            // Also update the content in the main project state to keep it in sync
             setProject(prevProject => {
                 if (!prevProject) return null;
                 const updatedFiles = prevProject.files.map(file =>
@@ -64,7 +69,7 @@ const Project = ({ token }) => {
         };
     }, [id, project, selectedFile]);
 
-
+    // Debounced handler for code changes
     const handleEditorChange = (value) => {
         setCode(value);
         if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
@@ -79,13 +84,10 @@ const Project = ({ token }) => {
         }, 500);
     };
 
+    // Handler to switch files, ensuring current work is saved
     const handleFileSelect = (fileToSelect) => {
-        // 1. Clear any pending debounced save
-        if (debounceTimeout.current) {
-            clearTimeout(debounceTimeout.current);
-        }
+        if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
 
-        // 2. Force-save the current file's content if it has changed
         if (selectedFile) {
             const currentFileInState = project.files.find(f => f.id === selectedFile.id);
             if (currentFileInState && currentFileInState.content !== code) {
@@ -94,7 +96,6 @@ const Project = ({ token }) => {
                     fileId: selectedFile.id,
                     content: code,
                 });
-                // 2a. Immediately update the "source of truth" in the local state
                 setProject(prevProject => {
                     const updatedFiles = prevProject.files.map(f =>
                         f.id === selectedFile.id ? { ...f, content: code } : f
@@ -103,32 +104,40 @@ const Project = ({ token }) => {
                 });
             }
         }
-
-        // 3. Switch to the new file
         setSelectedFile(fileToSelect);
         setCode(fileToSelect.content);
     };
 
-
-    const [showAddFileInput, setShowAddFileInput] = useState(false);
-    const [newFilename, setNewFilename] = useState('');
-
+    // Handler for adding a new file
     const handleAddNewFile = async (e) => {
         e.preventDefault();
         if (newFilename) {
             try {
                 const res = await api.post(`/projects/${id}/files`, { filename: newFilename });
                 const newFile = res.data;
-                setProject(prevProject => ({
-                    ...prevProject,
-                    files: [...prevProject.files, newFile],
-                }));
+                setProject(prev => ({ ...prev, files: [...prev.files, newFile] }));
                 setSelectedFile(newFile);
                 setCode(newFile.content);
                 setNewFilename('');
                 setShowAddFileInput(false);
             } catch (err) {
                 alert('Error: Could not add the new file.');
+            }
+        }
+    };
+
+    // Handler for adding a new member
+    const handleAddMember = async (e) => {
+        e.preventDefault();
+        if (newMemberEmail) {
+            try {
+                const res = await api.post(`/projects/${id}/members`, { email: newMemberEmail });
+                const newMember = res.data;
+                setProject(prev => ({ ...prev, members: [...prev.members, newMember] }));
+                setNewMemberEmail('');
+            } catch (err) {
+                const errorMsg = err.response?.data?.msg || 'Could not add member.';
+                alert(`Error: ${errorMsg}`);
             }
         }
     };
@@ -158,14 +167,29 @@ const Project = ({ token }) => {
                 )}
                 <hr />
                 {project.files && project.files.map((file) => (
-                    <div
-                        key={file.id}
-                        onClick={() => handleFileSelect(file)}
-                        style={selectedFile && selectedFile.id === file.id ? styles.activeFile : styles.fileItem}
-                    >
+                    <div key={file.id} onClick={() => handleFileSelect(file)} style={selectedFile?.id === file.id ? styles.activeFile : styles.fileItem}>
                         {file.filename}
                     </div>
                 ))}
+
+                <div style={{ marginTop: '20px' }}>
+                    <h4>Members</h4>
+                    <ul style={styles.memberList}>
+                        {project.members && project.members.map(member => (
+                            <li key={member.id} style={styles.memberItem}>{member.name} ({member.email})</li>
+                        ))}
+                    </ul>
+                    <form onSubmit={handleAddMember} style={styles.addFileForm}>
+                         <input
+                            type="email"
+                            value={newMemberEmail}
+                            onChange={(e) => setNewMemberEmail(e.target.value)}
+                            placeholder="user@example.com"
+                            style={styles.addFileInput}
+                        />
+                        <button type="submit" style={styles.addFileSubmit}>Add</button>
+                    </form>
+                </div>
             </div>
             <div style={styles.editorContainer}>
                 <Editor

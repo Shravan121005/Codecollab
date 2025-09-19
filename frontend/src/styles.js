@@ -188,6 +188,20 @@ const styles = {
         borderRadius: '0 4px 4px 0',
         cursor: 'pointer',
     },
+    // New styles for the member list
+    memberList: {
+        listStyle: 'none',
+        padding: 0,
+        margin: '10px 0',
+    },
+    memberItem: {
+        padding: '5px',
+        fontSize: '14px',
+        color: '#333',
+        backgroundColor: '#f0f0f0',
+        borderRadius: '3px',
+        marginBottom: '5px',
+    },
 };
 
 export default styles;
