@@ -122,16 +122,25 @@ const styles = {
         cursor: 'pointer',
     },
 
-    // Editor Page
+    // Updated Editor Page Layout
     editorLayout: {
         display: 'flex',
-        // This height calculation is crucial for Monaco Editor to work.
-        // It subtracts the approximate height of the navbar and margins from the viewport height.
         height: 'calc(100vh - 120px)',
         backgroundColor: 'white',
         borderRadius: '8px',
         boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
-        overflow: 'hidden', // Prevents content from spilling out
+        overflow: 'hidden',
+    },
+    // ** NEW 3-COLUMN LAYOUT **
+    editorLayoutThreeCol: {
+        display: 'grid',
+        gridTemplateColumns: '200px 1fr 300px',
+        // This line is crucial: it sets a fixed height for the entire layout
+        height: 'calc(100vh - 120px)',
+        backgroundColor: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.08)',
+        overflow: 'hidden', // This prevents anything from breaking out of the container
     },
     fileList: {
         width: '200px',
@@ -201,6 +210,63 @@ const styles = {
         backgroundColor: '#f0f0f0',
         borderRadius: '3px',
         marginBottom: '5px',
+    },
+    // ** NEW CHAT STYLES **
+    chatContainer: {
+        display: 'flex',        
+        flexDirection: 'column',
+        height: '100%',         
+        borderLeft: '1px solid #ddd',
+        minHeight:0,
+    },
+    chatHeader: {
+        padding: '10px 15px',
+        fontWeight: 'bold',
+        backgroundColor: '#f5f5f5',
+        borderBottom: '1px solid #ddd',
+        flexShrink: 0, 
+    },
+    messageList: {
+        flex: 1,               
+        padding: '10px',
+        overflowY: 'scroll',     
+        minHeight: 0,
+        // maxHeight:"200px",          
+    },
+    chatForm: {
+        display: 'flex',
+        padding: '10px',
+        borderTop: '1px solid #ddd',
+        backgroundColor: '#f5f5f5',
+        flexShrink: 0, // This prevents the input form from shrinking
+    },
+    messageItem: {
+        marginBottom: '10px',
+        padding: '8px 12px',
+        borderRadius: '8px',
+        backgroundColor: '#ecf0f1',
+        maxWidth: '90%',
+        wordWrap: 'break-word', // Prevent long messages from overflowing
+    },
+    messageTimestamp: {
+        fontSize: '0.75rem',
+        color: '#7f8c8d',
+        marginTop: '4px',
+        display: 'block',
+    },
+    chatInput: {
+        flex: 1,
+        padding: '8px',
+        border: '1px solid #ccc',
+        borderRadius: '4px 0 0 4px',
+    },
+    chatButton: {
+        padding: '8px 12px',
+        border: 'none',
+        backgroundColor: '#3498db',
+        color: 'white',
+        borderRadius: '0 4px 4px 0',
+        cursor: 'pointer',
     },
 };
 

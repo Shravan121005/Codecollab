@@ -4,6 +4,7 @@ const { check, validationResult } = require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { User } = require('../models'); // Import User from the central models/index.js
+require('dotenv').config();
 
 // @route   POST api/auth/register
 // @desc    Register a new user
@@ -78,7 +79,13 @@ router.post(
         return res.status(400).json({ msg: 'Invalid Credentials' });
       }
 
-      const payload = { user: { id: user.id } };
+      const payload = {
+          user: {
+              id: user.id,
+              name: user.name, // ** THE FIX IS HERE **
+          },
+      };
+      
       jwt.sign(
         payload,
         process.env.JWT_SECRET,

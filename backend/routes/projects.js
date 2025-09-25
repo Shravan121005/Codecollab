@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { Project, User, File, ProjectMember } = require('../models');
+const { Project, User, File, ProjectMember, Message } = require('../models');
 const authMiddleware = require('../middleware/authMiddleware');
 
 // Helper function to determine language from filename
@@ -167,6 +167,31 @@ router.post('/:projectId/members', authMiddleware, async (req, res) => {
         const member = { id: userToAdd.id, name: userToAdd.name, email: userToAdd.email };
         res.status(201).json(member);
     } catch (err) { res.status(500).send('Server Error'); }
+});
+
+//fetches messages for a project.
+router.get('/:projectId/messages', authMiddleware, async (req, res) => {
+    try {
+        const { projectId } = req.params;
+        // Security check: Make sure user is a member of the project
+        const isMember = await ProjectMember.findOne({ where: { projectId, userId: req.user.id } });
+        if (!isMember) {
+            return res.status(403).json({ msg: 'Access denied' });
+        }
+
+        const messages = await Message.findAll({
+            where: { projectId },
+            include: [{
+                model: User,
+                attributes: ['id', 'name'] // Include sender's name
+            }],
+            order: [['createdAt', 'ASC']] // Oldest messages first
+        });
+        res.json(messages);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
 });
 
 module.exports = router;

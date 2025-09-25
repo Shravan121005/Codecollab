@@ -4,6 +4,8 @@ import Editor from '@monaco-editor/react';
 import { io } from 'socket.io-client';
 import api from '../services/api.js';
 import styles from '../../styles.js';
+import Chat from '../chat/Chat.jsx';
+import { jwtDecode } from 'jwt-decode'; // Corrected import for this package
 
 const Project = ({ token }) => {
     const { id } = useParams();
@@ -11,13 +13,28 @@ const Project = ({ token }) => {
     const [selectedFile, setSelectedFile] = useState(null);
     const [code, setCode] = useState('');
     const [error, setError] = useState('');
-    const socketRef = useRef(null);
+    const [socket, setSocket] = useState(null);
     const debounceTimeout = useRef(null);
-
-    // State for forms
+    const [currentUser, setCurrentUser] = useState(null);
     const [newMemberEmail, setNewMemberEmail] = useState('');
     const [showAddFileInput, setShowAddFileInput] = useState(false);
     const [newFilename, setNewFilename] = useState('');
+
+    // Get current user info from JWT
+    // Get current user info from JWT
+    useEffect(() => {
+        if (token) {
+            try {
+                const decoded = jwtDecode(token);
+                if (decoded.user) {
+                    setCurrentUser({ id: decoded.user.id, name: decoded.user.name });
+                }
+            } catch (e) {
+                console.error("Invalid token:", e);
+                setError("Session authentication error.");
+            }
+        }
+    }, [token]);
 
     // Fetch project details
     useEffect(() => {
@@ -46,11 +63,11 @@ const Project = ({ token }) => {
     // Handle Socket.IO connection and events
     useEffect(() => {
         if (!project) return;
-        socketRef.current = io('http://localhost:5000');
-        const socket = socketRef.current;
-        socket.emit('joinProject', { projectId: id });
+        const newSocket = io('http://localhost:5000');
+        setSocket(newSocket);
+        newSocket.emit('joinProject', { projectId: id });
 
-        socket.on('codeUpdate', (data) => {
+        newSocket.on('codeUpdate', (data) => {
             if (selectedFile && data.fileId === selectedFile.id) {
                 setCode(prevCode => prevCode !== data.content ? data.content : prevCode);
             }
@@ -64,7 +81,7 @@ const Project = ({ token }) => {
         });
 
         return () => {
-            socket.disconnect();
+            newSocket.disconnect();
             if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
         };
     }, [id, project, selectedFile]);
@@ -74,8 +91,8 @@ const Project = ({ token }) => {
         setCode(value);
         if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
         debounceTimeout.current = setTimeout(() => {
-            if (socketRef.current && selectedFile) {
-                socketRef.current.emit('codeChange', {
+            if (socket && selectedFile) {
+                socket.emit('codeChange', {
                     projectId: id,
                     fileId: selectedFile.id,
                     content: value,
@@ -91,11 +108,13 @@ const Project = ({ token }) => {
         if (selectedFile) {
             const currentFileInState = project.files.find(f => f.id === selectedFile.id);
             if (currentFileInState && currentFileInState.content !== code) {
-                socketRef.current.emit('codeChange', {
-                    projectId: id,
-                    fileId: selectedFile.id,
-                    content: code,
-                });
+                if(socket) {
+                    socket.emit('codeChange', {
+                        projectId: id,
+                        fileId: selectedFile.id,
+                        content: code,
+                    });
+                }
                 setProject(prevProject => {
                     const updatedFiles = prevProject.files.map(f =>
                         f.id === selectedFile.id ? { ...f, content: code } : f
@@ -142,11 +161,16 @@ const Project = ({ token }) => {
         }
     };
 
+    // PHASE 3 CHANGE: Update the loading condition.
+    // The component now waits until both the project details AND the current user's
+    // information have been loaded before attempting to render the main UI.
     if (error) return <p style={styles.error}>{error}</p>;
-    if (!project) return <p>Loading project...</p>;
+    if (!project || !currentUser) return <p>Loading project...</p>;
 
-    return (
-        <div style={styles.editorLayout}>
+return (
+        // PHASE 3 CHANGE: The main container's style is updated to a new three-column layout
+        // to accommodate the file list, the editor, and the new chat sidebar.
+        <div style={styles.editorLayoutThreeCol}>
             <div style={styles.fileList}>
                 <h3>{project.name}</h3>
                 <button onClick={() => setShowAddFileInput(!showAddFileInput)} style={styles.addFileButton}>
@@ -154,14 +178,7 @@ const Project = ({ token }) => {
                 </button>
                 {showAddFileInput && (
                     <form onSubmit={handleAddNewFile} style={styles.addFileForm}>
-                        <input
-                            type="text"
-                            value={newFilename}
-                            onChange={(e) => setNewFilename(e.target.value)}
-                            placeholder="filename.js"
-                            style={styles.addFileInput}
-                            autoFocus
-                        />
+                        <input type="text" value={newFilename} onChange={(e) => setNewFilename(e.target.value)} placeholder="filename.js" style={styles.addFileInput} autoFocus />
                         <button type="submit" style={styles.addFileSubmit}>Add</button>
                     </form>
                 )}
@@ -171,7 +188,6 @@ const Project = ({ token }) => {
                         {file.filename}
                     </div>
                 ))}
-
                 <div style={{ marginTop: '20px' }}>
                     <h4>Members</h4>
                     <ul style={styles.memberList}>
@@ -180,13 +196,7 @@ const Project = ({ token }) => {
                         ))}
                     </ul>
                     <form onSubmit={handleAddMember} style={styles.addFileForm}>
-                         <input
-                            type="email"
-                            value={newMemberEmail}
-                            onChange={(e) => setNewMemberEmail(e.target.value)}
-                            placeholder="user@example.com"
-                            style={styles.addFileInput}
-                        />
+                         <input type="email" value={newMemberEmail} onChange={(e) => setNewMemberEmail(e.target.value)} placeholder="user@example.com" style={styles.addFileInput} />
                         <button type="submit" style={styles.addFileSubmit}>Add</button>
                     </form>
                 </div>
@@ -200,6 +210,7 @@ const Project = ({ token }) => {
                     theme="vs-dark"
                 />
             </div>
+            <Chat projectId={id} socket={socket} currentUser={currentUser} />
         </div>
     );
 };
