@@ -44,7 +44,7 @@ function Register({ onLogin }) {
                         required 
                         style={styles.input}
                         onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
-                        onBlur={(e) => Object.assign(e.target.style, { borderColor: '#475569', backgroundColor: '#0F172A' })}
+                        onBlur={(e) => Object.assign(e.target.style, { borderColor: '#3E3E42', backgroundColor: '#1E1E1E' })}
                     />
                     <input 
                         type="email" 
@@ -55,7 +55,7 @@ function Register({ onLogin }) {
                         required 
                         style={styles.input}
                         onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
-                        onBlur={(e) => Object.assign(e.target.style, { borderColor: '#475569', backgroundColor: '#0F172A' })}
+                        onBlur={(e) => Object.assign(e.target.style, { borderColor: '#3E3E42', backgroundColor: '#1E1E1E' })}
                     />
                     <input 
                         type="password" 
@@ -66,7 +66,7 @@ function Register({ onLogin }) {
                         required 
                         style={styles.input}
                         onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
-                        onBlur={(e) => Object.assign(e.target.style, { borderColor: '#475569', backgroundColor: '#0F172A' })}
+                        onBlur={(e) => Object.assign(e.target.style, { borderColor: '#3E3E42', backgroundColor: '#1E1E1E' })}
                     />
                     <button 
                         type="submit" 

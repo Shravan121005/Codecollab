@@ -71,15 +71,15 @@ const Chat = ({ projectId, socket, currentUser }) => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         height: '100%',
-                        color: '#94A3B8',
-                        fontSize: '14px',
+                        color: '#858585',
+                        fontSize: '12px',
                         textAlign: 'center',
                         padding: '20px',
                     }}>
                         <div>
-                            <p style={{ fontSize: '40px', margin: '0 0 12px 0' }}>👋</p>
+                            <p style={{ fontSize: '36px', margin: '0 0 12px 0' }}>💬</p>
                             <p style={{ margin: 0, fontWeight: '500' }}>No messages yet</p>
-                            <p style={{ margin: '4px 0 0 0', fontSize: '13px' }}>Start the conversation!</p>
+                            <p style={{ margin: '4px 0 0 0', fontSize: '11px' }}>Start the conversation!</p>
                         </div>
                     </div>
                 ) : (
@@ -89,8 +89,8 @@ const Chat = ({ projectId, socket, currentUser }) => {
                             style={{
                                 ...styles.messageItem,
                                 alignSelf: msg.User?.id === currentUser?.id ? 'flex-end' : 'flex-start',
-                                backgroundColor: msg.User?.id === currentUser?.id ? 'rgba(99, 102, 241, 0.15)' : '#0F172A',
-                                borderLeftColor: msg.User?.id === currentUser?.id ? '#06B6D4' : '#6366F1',
+                                backgroundColor: msg.User?.id === currentUser?.id ? 'rgba(14, 99, 156, 0.15)' : '#1E1E1E',
+                                borderLeftColor: msg.User?.id === currentUser?.id ? '#CE9178' : '#0E639C',
                                 borderLeft: '3px solid',
                             }}
                         >
@@ -112,8 +112,8 @@ const Chat = ({ projectId, socket, currentUser }) => {
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type a message..."
                     style={styles.chatInput}
-                    onFocus={(e) => Object.assign(e.target.style, { borderColor: '#6366F1', backgroundColor: '#1E293B' })}
-                    onBlur={(e) => Object.assign(e.target.style, { borderColor: '#475569', backgroundColor: '#1E293B' })}
+                    onFocus={(e) => Object.assign(e.target.style, { borderColor: '#0E639C', backgroundColor: '#252526' })}
+                    onBlur={(e) => Object.assign(e.target.style, { borderColor: '#3E3E42', backgroundColor: '#252526' })}
                 />
                 <button 
                     type="submit" 
