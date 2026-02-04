@@ -5,7 +5,7 @@ import { io } from 'socket.io-client';
 import api from '../services/api.js';
 import styles from '../../styles.js';
 import Chat from '../chat/Chat.jsx';
-import { jwtDecode } from 'jwt-decode'; // Corrected import for this package
+import { jwtDecode } from 'jwt-decode';
 
 const Project = ({ token }) => {
     const { id } = useParams();
@@ -19,8 +19,8 @@ const Project = ({ token }) => {
     const [newMemberEmail, setNewMemberEmail] = useState('');
     const [showAddFileInput, setShowAddFileInput] = useState(false);
     const [newFilename, setNewFilename] = useState('');
+    const [hoverFileItem, setHoverFileItem] = useState(null);
 
-    // Get current user info from JWT
     // Get current user info from JWT
     useEffect(() => {
         if (token) {
@@ -161,46 +161,92 @@ const Project = ({ token }) => {
         }
     };
 
-    // PHASE 3 CHANGE: Update the loading condition.
-    // The component now waits until both the project details AND the current user's
-    // information have been loaded before attempting to render the main UI.
-    if (error) return <p style={styles.error}>{error}</p>;
-    if (!project || !currentUser) return <p>Loading project...</p>;
+    if (error) return <div style={{ ...styles.container, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><p style={styles.error}>{error}</p></div>;
+    if (!project || !currentUser) return (
+        <div style={{ ...styles.container, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <p style={{ color: '#94A3B8' }}>Loading project...</p>
+        </div>
+    );
 
-return (
-        // PHASE 3 CHANGE: The main container's style is updated to a new three-column layout
-        // to accommodate the file list, the editor, and the new chat sidebar.
+    return (
         <div style={styles.editorLayoutThreeCol}>
+            {/* Left Sidebar - File List */}
             <div style={styles.fileList}>
-                <h3>{project.name}</h3>
-                <button onClick={() => setShowAddFileInput(!showAddFileInput)} style={styles.addFileButton}>
-                    {showAddFileInput ? 'Cancel' : '+ Add File'}
+                <div style={styles.fileListHeader}>📁 {project.name}</div>
+                <button 
+                    onClick={() => setShowAddFileInput(!showAddFileInput)} 
+                    style={{
+                        ...styles.addFileButton,
+                        marginBottom: '16px'
+                    }}
+                    onMouseEnter={(e) => Object.assign(e.target.style, styles.addFileButtonHover)}
+                    onMouseLeave={(e) => Object.assign(e.target.style, { ...styles.addFileButton })}
+                >
+                    {showAddFileInput ? '✕ Cancel' : '+ Add File'}
                 </button>
                 {showAddFileInput && (
                     <form onSubmit={handleAddNewFile} style={styles.addFileForm}>
-                        <input type="text" value={newFilename} onChange={(e) => setNewFilename(e.target.value)} placeholder="filename.js" style={styles.addFileInput} autoFocus />
-                        <button type="submit" style={styles.addFileSubmit}>Add</button>
+                        <input 
+                            type="text" 
+                            value={newFilename} 
+                            onChange={(e) => setNewFilename(e.target.value)} 
+                            placeholder="filename.js" 
+                            style={styles.addFileInput} 
+                            autoFocus 
+                        />
+                        <button type="submit" style={styles.addFileSubmit}>✓</button>
                     </form>
                 )}
-                <hr />
-                {project.files && project.files.map((file) => (
-                    <div key={file.id} onClick={() => handleFileSelect(file)} style={selectedFile?.id === file.id ? styles.activeFile : styles.fileItem}>
-                        {file.filename}
-                    </div>
-                ))}
-                <div style={{ marginTop: '20px' }}>
-                    <h4>Members</h4>
+                <div style={{ marginBottom: '16px', borderBottom: '1px solid #334155' }} />
+                <div style={{ fontSize: '12px', fontWeight: '700', color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '12px' }}>Files</div>
+                {project.files && project.files.length > 0 ? (
+                    project.files.map((file) => (
+                        <div 
+                            key={file.id} 
+                            onClick={() => handleFileSelect(file)} 
+                            style={{
+                                ...(selectedFile?.id === file.id ? styles.activeFile : styles.fileItem),
+                                ...(hoverFileItem === file.id && !selectedFile?.id === file.id && styles.fileItemHover)
+                            }}
+                            onMouseEnter={() => setHoverFileItem(file.id)}
+                            onMouseLeave={() => setHoverFileItem(null)}
+                            title={file.filename}
+                        >
+                            📄 {file.filename}
+                        </div>
+                    ))
+                ) : (
+                    <p style={{ fontSize: '13px', color: '#94A3B8', margin: '8px 0' }}>No files yet</p>
+                )}
+                
+                {/* Members Section */}
+                <div style={styles.memberSection}>
+                    <div style={styles.memberSectionTitle}>👥 Team Members</div>
                     <ul style={styles.memberList}>
-                        {project.members && project.members.map(member => (
-                            <li key={member.id} style={styles.memberItem}>{member.name} ({member.email})</li>
-                        ))}
+                        {project.members && project.members.length > 0 ? (
+                            project.members.map(member => (
+                                <li key={member.id} style={styles.memberItem}>
+                                    <span style={{ fontSize: '12px' }}>👤</span> {member.name}
+                                </li>
+                            ))
+                        ) : (
+                            <li style={{ ...styles.memberItem, color: '#94A3B8' }}>Just you</li>
+                        )}
                     </ul>
                     <form onSubmit={handleAddMember} style={styles.addFileForm}>
-                         <input type="email" value={newMemberEmail} onChange={(e) => setNewMemberEmail(e.target.value)} placeholder="user@example.com" style={styles.addFileInput} />
-                        <button type="submit" style={styles.addFileSubmit}>Add</button>
+                        <input 
+                            type="email" 
+                            value={newMemberEmail} 
+                            onChange={(e) => setNewMemberEmail(e.target.value)} 
+                            placeholder="user@example.com" 
+                            style={styles.addFileInput} 
+                        />
+                        <button type="submit" style={styles.addFileSubmit}>+</button>
                     </form>
                 </div>
             </div>
+
+            {/* Center - Editor */}
             <div style={styles.editorContainer}>
                 <Editor
                     height="100%"
@@ -208,8 +254,16 @@ return (
                     value={code}
                     onChange={handleEditorChange}
                     theme="vs-dark"
+                    options={{
+                        minimap: { enabled: true },
+                        fontSize: 13,
+                        lineHeight: 20,
+                        fontFamily: "'Fira Code', 'Monaco', 'Courier New', monospace",
+                    }}
                 />
             </div>
+
+            {/* Right Sidebar - Chat */}
             <Chat projectId={id} socket={socket} currentUser={currentUser} />
         </div>
     );

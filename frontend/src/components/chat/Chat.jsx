@@ -5,17 +5,15 @@ import styles from '../../styles';
 const Chat = ({ projectId, socket, currentUser }) => {
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
+    const [hoverSend, setHoverSend] = useState(false);
     const messageListRef = useRef(null);
 
-    // This useEffect hook handles the auto-scrolling
     useEffect(() => {
         if (messageListRef.current) {
-            // Set the scroll position to the very bottom of the message list
             messageListRef.current.scrollTop = messageListRef.current.scrollHeight;
         }
-    }, [messages]); // This runs every time the messages array changes
+    }, [messages]);
 
-    // Fetch message history on component mount
     useEffect(() => {
         const fetchMessages = async () => {
             if (!projectId) return;
@@ -29,7 +27,6 @@ const Chat = ({ projectId, socket, currentUser }) => {
         fetchMessages();
     }, [projectId]);
 
-    // Listen for new messages from the socket
     useEffect(() => {
         if (!socket) return;
         socket.on('newMessage', (incomingMessage) => {
@@ -59,20 +56,54 @@ const Chat = ({ projectId, socket, currentUser }) => {
         }
     };
 
+    const formatTime = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
     return (
         <div style={styles.chatContainer}>
-            <div style={styles.chatHeader}>Project Chat</div>
-            {/* Attach the ref here so our useEffect can control its scroll position */}
+            <div style={styles.chatHeader}>💬 Project Chat</div>
             <div ref={messageListRef} style={styles.messageList}>
-                {messages.map(msg => (
-                    <div key={msg.id} style={styles.messageItem}>
-                        <strong style={{ color: '#2980b9' }}>{msg.User?.name || 'User'}</strong>
-                        <p style={{ margin: '4px 0' }}>{msg.content}</p>
-                        <span style={styles.messageTimestamp}>
-                            {new Date(msg.createdAt).toLocaleTimeString()}
-                        </span>
+                {messages.length === 0 ? (
+                    <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        height: '100%',
+                        color: '#94A3B8',
+                        fontSize: '14px',
+                        textAlign: 'center',
+                        padding: '20px',
+                    }}>
+                        <div>
+                            <p style={{ fontSize: '40px', margin: '0 0 12px 0' }}>👋</p>
+                            <p style={{ margin: 0, fontWeight: '500' }}>No messages yet</p>
+                            <p style={{ margin: '4px 0 0 0', fontSize: '13px' }}>Start the conversation!</p>
+                        </div>
                     </div>
-                ))}
+                ) : (
+                    messages.map(msg => (
+                        <div 
+                            key={msg.id} 
+                            style={{
+                                ...styles.messageItem,
+                                alignSelf: msg.User?.id === currentUser?.id ? 'flex-end' : 'flex-start',
+                                backgroundColor: msg.User?.id === currentUser?.id ? 'rgba(99, 102, 241, 0.15)' : '#0F172A',
+                                borderLeftColor: msg.User?.id === currentUser?.id ? '#06B6D4' : '#6366F1',
+                                borderLeft: '3px solid',
+                            }}
+                        >
+                            <div style={styles.messageAuthor}>
+                                {msg.User?.name || 'User'} {msg.User?.id === currentUser?.id && '(you)'}
+                            </div>
+                            <p style={styles.messageContent}>{msg.content}</p>
+                            <span style={styles.messageTimestamp}>
+                                {formatTime(msg.createdAt)}
+                            </span>
+                        </div>
+                    ))
+                )}
             </div>
             <form onSubmit={handleSendMessage} style={styles.chatForm}>
                 <input
@@ -81,8 +112,20 @@ const Chat = ({ projectId, socket, currentUser }) => {
                     onChange={(e) => setNewMessage(e.target.value)}
                     placeholder="Type a message..."
                     style={styles.chatInput}
+                    onFocus={(e) => Object.assign(e.target.style, { borderColor: '#6366F1', backgroundColor: '#1E293B' })}
+                    onBlur={(e) => Object.assign(e.target.style, { borderColor: '#475569', backgroundColor: '#1E293B' })}
                 />
-                <button type="submit" style={styles.chatButton}>Send</button>
+                <button 
+                    type="submit" 
+                    style={{
+                        ...styles.chatButton,
+                        ...(hoverSend && styles.chatButtonHover)
+                    }}
+                    onMouseEnter={() => setHoverSend(true)}
+                    onMouseLeave={() => setHoverSend(false)}
+                >
+                    Send
+                </button>
             </form>
         </div>
     );
