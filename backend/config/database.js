@@ -16,4 +16,24 @@ const sequelize = new Sequelize(
   }
 );
 
+const connectWithRetry = async () => {
+  let retries = 10;
+
+  while (retries) {
+    try {
+      await sequelize.authenticate();
+      console.log('✅ Database connected successfully');
+      await sequelize.sync();
+      console.log('✅ Models synced');
+      break;
+    } catch (err) {
+      console.log('❌ DB connection failed. Retrying in 5 sec...', err.message);
+      retries -= 1;
+      await new Promise(res => setTimeout(res, 5000));
+    }
+  }
+};
+
+connectWithRetry();
+
 module.exports = sequelize;
