@@ -9,7 +9,6 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/dashboard/Dashboard';
 import Project from './components/project/Project';
-import LandingPage from './components/landing/LandingPage';
 
 function App() {
     const [token, setToken] = useState(null);
@@ -67,7 +66,7 @@ function App() {
                     <Route path="/register" element={!token ? <Register onLogin={handleLogin} /> : <Navigate to="/dashboard" />} />
                     <Route path="/dashboard" element={token ? <Dashboard token={token} /> : <Navigate to="/login" />} />
                     <Route path="/project/:id" element={token ? <Project token={token} /> : <Navigate to="/login" />} />
-                    <Route path="/" element={!token ? <LandingPage /> : <Navigate to="/dashboard" />} />
+                    <Route path="/" element={token ? <Navigate to="/dashboard" /> : <Navigate to="/login" />} />
                 </Routes>
             </div>
         </Router>

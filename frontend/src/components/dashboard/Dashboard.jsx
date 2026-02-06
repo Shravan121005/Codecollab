@@ -61,7 +61,7 @@ function Dashboard({ token }) {
 
     return (
         <div style={styles.dashboardContainer}>
-            <div style={{ marginBottom: '40px' }}>
+            <div style={{ marginBottom: '48px' }}>
                 <h1 style={styles.dashboardTitle}>My Projects</h1>
                 <p style={styles.dashboardSubtitle}>Create, manage, and collaborate on your coding projects</p>
             </div>
@@ -69,7 +69,7 @@ function Dashboard({ token }) {
             {error && <div style={styles.error}>{error}</div>}
 
             <div style={styles.dashboardCard}>
-                <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#D4D4D4', marginBottom: '20px', margin: '0 0 20px 0' }}>Create a New Project</h3>
+                <h3 style={{ fontSize: '20px', fontWeight: '800', color: '#F1F5F9', marginBottom: '20px' }}>✨ Create a New Project</h3>
                 <form onSubmit={onCreateProject}>
                     <input
                         type="text"
@@ -78,34 +78,34 @@ function Dashboard({ token }) {
                         onChange={(e) => setProjectName(e.target.value)}
                         style={styles.input}
                         onFocus={(e) => Object.assign(e.target.style, styles.inputFocus)}
-                        onBlur={(e) => Object.assign(e.target.style, { borderColor: '#3E3E42', backgroundColor: '#1E1E1E' })}
+                        onBlur={(e) => Object.assign(e.target.style, { borderColor: '#475569', backgroundColor: '#0F172A' })}
                         required
                     />
-                    <button
-                        type="submit"
-                        style={{...styles.button, marginTop: '8px'}}
+                    <button 
+                        type="submit" 
+                        style={{...styles.button, marginTop: '16px'}}
                         disabled={loading}
                     >
-                        {loading ? 'Creating...' : 'Create Project'}
+                        {loading ? '⏳ Creating...' : '🚀 Create Project'}
                     </button>
                 </form>
             </div>
             
             <div>
-                <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#D4D4D4', marginTop: '40px', marginBottom: '20px', margin: '40px 0 20px 0' }}>
-                    Your Projects {projects.length > 0 && <span style={{ color: '#CE9178' }}>({projects.length})</span>}
+                <h3 style={{ fontSize: '24px', fontWeight: '800', color: '#F1F5F9', marginTop: '40px', marginBottom: '24px' }}>
+                    📂 Your Projects {projects.length > 0 && <span style={{ color: '#06B6D4' }}>({projects.length})</span>}
                 </h3>
                 {projects.length === 0 ? (
                     <div style={{
                         textAlign: 'center',
                         padding: '60px 40px',
-                        backgroundColor: '#252526',
-                        borderRadius: '0px',
-                        border: '1px dashed #3E3E42',
+                        backgroundColor: '#1E293B',
+                        borderRadius: '16px',
+                        border: '2px dashed #475569',
                     }}>
-                        <p style={{ fontSize: '48px', margin: '0 0 20px 0' }}>📁</p>
-                        <h4 style={{ color: '#D4D4D4', margin: '0 0 12px 0', fontSize: '18px', fontWeight: '600' }}>No projects yet</h4>
-                        <p style={{ color: '#858585', margin: 0, fontSize: '14px' }}>Create your first project to get started with collaboration</p>
+                        <p style={{ fontSize: '56px', margin: '0 0 20px 0' }}>📁</p>
+                        <h4 style={{ color: '#F1F5F9', margin: '0 0 12px 0', fontSize: '22px', fontWeight: '700' }}>No projects yet</h4>
+                        <p style={{ color: '#94A3B8', margin: 0, fontSize: '16px' }}>Create your first project to get started with collaboration</p>
                     </div>
                 ) : (
                     <div style={styles.projectList}>

@@ -179,8 +179,8 @@ const Project = ({ token }) => {
                         ...styles.addFileButton,
                         marginBottom: '16px'
                     }}
-                    onMouseEnter={(e) => e.target.style.background = '#1177BB'}
-                    onMouseLeave={(e) => e.target.style.background = '#0E639C'}
+                    onMouseEnter={(e) => Object.assign(e.target.style, styles.addFileButtonHover)}
+                    onMouseLeave={(e) => Object.assign(e.target.style, { ...styles.addFileButton })}
                 >
                     {showAddFileInput ? '✕ Cancel' : '+ Add File'}
                 </button>
