@@ -67,7 +67,7 @@ function App() {
                     <Route path="/register" element={!token ? <Register onLogin={handleLogin} /> : <Navigate to="/dashboard" />} />
                     <Route path="/dashboard" element={token ? <Dashboard token={token} /> : <Navigate to="/login" />} />
                     <Route path="/project/:id" element={token ? <Project token={token} /> : <Navigate to="/login" />} />
-                    <Route path="/" element={!token ? <LandingPage /> : <Navigate to="/dashboard" />} />
+                    <Route path="/" element={<LandingPage />} />
                 </Routes>
             </div>
         </Router>

@@ -46,15 +46,6 @@ function LandingPage() {
 
     return (
         <div style={{ ...styles.container, minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-            <nav style={styles.nav}>
-                <div style={styles.navBrand}>
-                    <span style={{ fontSize: '20px' }}>⚡</span> CodeCollab
-                </div>
-                <div style={styles.navLinks}>
-                    <Link to="/login" style={{ ...styles.navLink, textDecoration: 'none' }}>Login</Link>
-                    <Link to="/register" style={{ ...styles.navButton, textDecoration: 'none', display: 'inline-block', padding: '8px 16px' }}>Get Started</Link>
-                </div>
-            </nav>
 
             <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                 <section style={{
