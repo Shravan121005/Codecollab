@@ -214,7 +214,7 @@ function LandingPage() {
                 color: '#858585',
                 fontSize: '12px',
             }}>
-                <p style={{ margin: 0 }}>© 2024 CodeCollab. All rights reserved.</p>
+                <p style={{ margin: 0 }}>© 2026 CodeCollab. All rights reserved.</p>
             </footer>
         </div>
     );

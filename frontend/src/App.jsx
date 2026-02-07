@@ -9,6 +9,7 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import Dashboard from './components/dashboard/Dashboard';
 import Project from './components/project/Project';
+import LandingPage from './components/landing/LandingPage';
 
 function App() {
     const [token, setToken] = useState(null);
