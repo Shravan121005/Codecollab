@@ -7,33 +7,33 @@ let sequelize;
 
 // for prod use to connect to render postgres
 
-// if (process.env.DATABASE_URL) {
-//   sequelize = new Sequelize(process.env.DB_URL, {
-//     dialect: 'postgres',
-//     protocol: 'postgres',
-//     dialectOptions: {
-//       ssl: {
-//         require: true,
-//         rejectUnauthorized: false
-//       }
-//     },
-//     logging: false
-//   });
-// } 
-// // Fallback for local docker-compose
-// else {
-//   sequelize = new Sequelize(
-//     process.env.DB_NAME,
-//     process.env.DB_USER,
-//     process.env.DB_PASSWORD,
-//     {
-//       host: process.env.DB_HOST,
-//       port: process.env.DB_PORT,
-//       dialect: 'postgres',
-//       logging: false,
-//     }
-//   );
-// }
+if (process.env.DATABASE_URL) {
+  sequelize = new Sequelize(process.env.DB_URL, {
+    dialect: 'postgres',
+    protocol: 'postgres',
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    },
+    logging: false
+  });
+} 
+// Fallback for local docker-compose
+else {
+  sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+    {
+      host: process.env.DB_HOST,
+      port: process.env.DB_PORT,
+      dialect: 'postgres',
+      logging: false,
+    }
+  );
+}
 
 // for local use to connect to db container
   sequelize = new Sequelize(
