@@ -6,7 +6,10 @@ require('dotenv').config();
 
 const sequelize = require('./config/database');
 
-// Let's debug what's being imported
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://codecollab-frontend-q2wp.onrender.com"
+];
 const models = require('./models');
 const { User, Project, File, Message } = models;
 
@@ -14,14 +17,22 @@ const { User, Project, File, Message } = models;
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: {
-        origin: "http://localhost:3000",
-        methods: ["GET", "POST"]
-    }
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
+  }
 });
 
 // Middleware
-app.use(cors());
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "x-auth-token"]
+}));
+
+app.options("*", cors());
 app.use(express.json());
 
 // API Routes
