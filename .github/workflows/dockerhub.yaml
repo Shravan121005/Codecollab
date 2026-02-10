@@ -39,3 +39,9 @@ jobs:
         run: |
           docker push shravan121005/codecollab-backend:latest
           docker push shravan121005/codecollab-backend:$VERSION
+
+      - name: Trigger Render Backend Deploy
+        run: |
+          curl -X POST "$RENDER_BACKEND_DEPLOY_HOOK"
+        env:
+          RENDER_BACKEND_DEPLOY_HOOK: ${{ secrets.RENDER_BACKEND_DEPLOY_HOOK }}
