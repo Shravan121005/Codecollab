@@ -7,7 +7,7 @@ let sequelize;
 
 // for prod use to connect to render postgres
 
-if (process.env.DATABASE_URL) {
+if (process.env.DB_URL) {
   sequelize = new Sequelize(process.env.DB_URL, {
     dialect: 'postgres',
     protocol: 'postgres',
@@ -20,7 +20,6 @@ if (process.env.DATABASE_URL) {
     logging: false
   });
 } 
-// Fallback for local docker-compose
 else {
   sequelize = new Sequelize(
     process.env.DB_NAME,
