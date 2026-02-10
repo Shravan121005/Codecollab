@@ -63,7 +63,7 @@ const Project = ({ token }) => {
     // Handle Socket.IO connection and events
     useEffect(() => {
         if (!project) return;
-        const newSocket = io('http://localhost:5000');
+        const newSocket = io(process.env.REACT_APP_API_URL);
         setSocket(newSocket);
         newSocket.emit('joinProject', { projectId: id });
 
