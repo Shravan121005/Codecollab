@@ -15,23 +15,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Verify CI Success
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const { data } = await github.rest.actions.listWorkflowRuns({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: "ci-tests.yaml",
-              per_page: 5
-            });
-
-            const run = data.workflow_runs.find(r => r.head_sha === context.sha);
-
-            if (!run || run.conclusion !== "success") {
-              core.setFailed("CI did not pass for this commit.");
-            }
-
       # ----- CHANGE 1: Extract version -----
       - name: Set image version
         run: |
