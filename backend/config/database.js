@@ -54,6 +54,8 @@ const connectWithRetry = async () => {
   }
 };
 
-connectWithRetry();
+if (process.env.NODE_ENV !== "test") {
+  connectWithRetry();
+}
 
 module.exports = sequelize;

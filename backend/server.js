@@ -4,17 +4,18 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 require('dotenv').config();
 
+const app = require('./app');
+
 const sequelize = require('./config/database');
 
 const allowedOrigins = [
   "http://localhost:3000",
   "https://codecollab-frontend-q2wp.onrender.com"
 ];
+
 const models = require('./models');
 const { User, Project, File, Message } = models;
 
-
-const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -23,26 +24,6 @@ const io = new Server(server, {
     credentials: true
   }
 });
-
-// Middleware
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true,
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "x-auth-token"]
-}));
-
-app.options("*", cors());
-app.use(express.json());
-
-// API Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/projects', require('./routes/projects'));
-
-app.get('/', (req, res) => {
-    res.send('CodeCollab API is running...');
-});
-
 
 // Real-time communication with Socket.io
 io.on('connection', (socket) => {
